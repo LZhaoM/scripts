@@ -27,10 +27,10 @@ FUNCTION="$GADGET/functions/uvc.0"
 
 configfs_make()
 {
-    if [[ ! -e "/sys/kernel/config/usb_gadget/$UDC" ]];
+    if [[ ! -e $GADGET ]];
     then
-        mkdir -p "/sys/kernel/config/usb_gadget/$UDC"
-        pushd "/sys/kernel/config/usb_gadget/$UDC"
+        mkdir -p $GADGET
+        pushd $GADGET
 
         echo "0x1d6b" > "idVendor"  # Linux Foundation
         echo "0x0104" > "idProduct" # Multifunction Composite Gadget
@@ -42,10 +42,10 @@ configfs_make()
 
         popd
     fi
-    if [[ ! -e "/sys/kernel/config/usb_gadget/$UDC/strings/0x409" ]];
+    if [[ ! -e "$GADGET/strings/0x409" ]];
     then
-        mkdir -p "/sys/kernel/config/usb_gadget/$UDC/strings/0x409"
-        pushd "/sys/kernel/config/usb_gadget/$UDC/strings/0x409"
+        mkdir -p "$GADGET/strings/0x409"
+        pushd "$GADGET/strings/0x409"
 
         echo "0123456789ABCDEF" > "serialnumber"
         echo "Radxa" > "manufacturer"
@@ -53,19 +53,19 @@ configfs_make()
 
         popd
     fi
-    if [[ ! -e "/sys/kernel/config/usb_gadget/$UDC/configs/r.1" ]];
+    if [[ ! -e "$GADGET/configs/r.1" ]];
     then
-        mkdir -p "/sys/kernel/config/usb_gadget/$UDC/configs/r.1"
-        pushd "/sys/kernel/config/usb_gadget/$UDC/configs/r.1"
+        mkdir -p "$GADGET/configs/r.1"
+        pushd "$GADGET/configs/r.1"
 
         echo "500" > "MaxPower"
 
         popd
     fi
-    if [[ ! -e "/sys/kernel/config/usb_gadget/$UDC/configs/r.1/strings/0x409" ]];
+    if [[ ! -e "$GADGET/configs/r.1/strings/0x409" ]];
     then
-        mkdir -p "/sys/kernel/config/usb_gadget/$UDC/configs/r.1/strings/0x409"
-        pushd "/sys/kernel/config/usb_gadget/$UDC/configs/r.1/strings/0x409"
+        mkdir -p "$GADGET/configs/r.1/strings/0x409"
+        pushd "$GADGET/configs/r.1/strings/0x409"
 
         echo "USB Composite Device" > "configuration"
 
@@ -101,22 +101,21 @@ configfs_make
 
 mkdir -p $FUNCTION
 
+# You must configure the gadget by telling it which formats you support, as
+# well as the frame sizes and frame intervals that are supported for each
+# format.
+# https://origin.kernel.org/doc/html/v6.19/usb/gadget_uvc.html#formats-and-frames
 create_frame 1280 720 mjpeg mjpeg
 #create_frame 1920 1080 mjpeg mjpeg
 #create_frame 1280 720 uncompressed yuyv
 #create_frame 1920 1080 uncompressed yuyv
 
+# Header linking is required
+# https://origin.kernel.org/doc/html/v6.19/usb/gadget_uvc.html#formats-and-frames
 mkdir $FUNCTION/streaming/header/h
-
-# This section links the format descriptors and their associated frames
-# to the header
 pushd $FUNCTION/streaming/header/h
 #ln -s ../../uncompressed/yuyv
 ln -s ../../mjpeg/mjpeg
-
-# This section ensures that the header will be transmitted for each
-# speed's set of descriptors. If support for a particular speed is not
-# needed then it can be skipped here.
 cd ../../class/fs
 ln -s ../../header/h
 cd ../../class/hs
@@ -127,7 +126,7 @@ cd ../../../control
 mkdir header/h
 ln -s header/h class/fs
 ln -s header/h class/ss
-
 popd
 
-ln -s $FUNCTION "/sys/kernel/config/usb_gadget/$UDC/configs/r.1"
+# https://origin.kernel.org/doc/html/v6.19/usb/gadget_configfs.html#associating-the-functions-with-their-configurations
+ln -s $FUNCTION "$GADGET/configs/r.1"
