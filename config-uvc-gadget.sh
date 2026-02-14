@@ -16,7 +16,7 @@
 # Requirements:
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_uvc.html#configuring-the-device-kernel
 
-# This scripts is based on the following two Linux documentation links:
+# This script is based on the following two Linux documentation links:
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_uvc.html
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_configfs.html
 
