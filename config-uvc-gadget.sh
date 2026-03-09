@@ -90,6 +90,7 @@ create_frame() {
         echo $(( $WIDTH * $HEIGHT * 2 )) > $wdir/dwMaxVideoFrameBufferSize
         cat <<EOF > $wdir/dwFrameInterval
 666666
+166666
 100000
 5000000
 EOF
@@ -105,17 +106,18 @@ mkdir -p $FUNCTION
 # well as the frame sizes and frame intervals that are supported for each
 # format.
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_uvc.html#formats-and-frames
-create_frame 1280 720 mjpeg mjpeg
+#create_frame 1280 720 mjpeg mjpeg
 #create_frame 1920 1080 mjpeg mjpeg
-#create_frame 1280 720 uncompressed yuyv
-#create_frame 1920 1080 uncompressed yuyv
+create_frame 1280 720 uncompressed yuyv
+create_frame 1600 1200 uncompressed yuyv
+create_frame 1920 1080 uncompressed yuyv
 
 # Header linking is required
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_uvc.html#formats-and-frames
 mkdir $FUNCTION/streaming/header/h
 pushd $FUNCTION/streaming/header/h
-#ln -s ../../uncompressed/yuyv
-ln -s ../../mjpeg/mjpeg
+ln -s ../../uncompressed/yuyv
+#ln -s ../../mjpeg/mjpeg
 cd ../../class/fs
 ln -s ../../header/h
 cd ../../class/hs
@@ -127,6 +129,12 @@ mkdir header/h
 ln -s header/h class/fs
 ln -s header/h class/ss
 popd
+
+# Maximize framerate
+# https://docs.kernel.org/usb/gadget_uvc.html#bandwidth-configuration
+echo 1 > $FUNCTION/streaming_interval
+echo 3072 > $FUNCTION/streaming_maxpacket
+echo 15 > $FUNCTION/streaming_maxburst
 
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_configfs.html#associating-the-functions-with-their-configurations
 ln -s $FUNCTION "$GADGET/configs/r.1"
