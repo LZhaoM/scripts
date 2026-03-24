@@ -133,7 +133,8 @@ popd
 # Maximize framerate
 # https://docs.kernel.org/usb/gadget_uvc.html#bandwidth-configuration
 echo 1 > $FUNCTION/streaming_interval
-echo 3072 > $FUNCTION/streaming_maxpacket
+echo "bulk" > $FUNCTION/streaming_transfer
+echo 16384 > $FUNCTION/streaming_maxpacket
 echo 15 > $FUNCTION/streaming_maxburst
 
 # https://origin.kernel.org/doc/html/v6.19/usb/gadget_configfs.html#associating-the-functions-with-their-configurations
